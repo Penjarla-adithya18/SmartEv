@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">SmartEV</string>
+    <string name="title_activity_main">SmartEV</string>
+    <string name="package_name">com.smartev.app</string>
+    <string name="custom_url_scheme">com.smartev.app</string>
+</resources>
