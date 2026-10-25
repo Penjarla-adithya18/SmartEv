@@ -988,7 +988,7 @@ function StationCompareCard({
 
   const isFaster = station.powerKw > otherStation.powerKw
   const isCheaper = station.pricePerKwh < otherStation.pricePerKwh
-  const isHigherRated = station.rating > otherStation.rating
+  const isHigherRated = (station.rating ?? 0) > (otherStation.rating ?? 0)
 
   return (
     <article className="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0f172a] p-6 shadow-sm space-y-4 flex flex-col justify-between">

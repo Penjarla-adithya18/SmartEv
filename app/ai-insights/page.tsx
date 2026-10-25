@@ -199,7 +199,7 @@ export default function AIInsightsPage() {
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''
     if (!apiKey) return
 
-    setOptions({
+    ;(setOptions as any)({
       apiKey,
       version: 'weekly',
     })

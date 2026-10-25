@@ -220,7 +220,7 @@ export default function GoogleMapComponent({
       return
     }
 
-    setOptions({
+    ;(setOptions as any)({
       apiKey: apiKey,
       version: 'weekly',
     })

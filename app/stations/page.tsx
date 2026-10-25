@@ -54,9 +54,9 @@ function StationsContent() {
       const q = searchQuery.toLowerCase()
       const matchText =
         !q ||
-        station.name.toLowerCase().includes(q) ||
-        station.address.toLowerCase().includes(q) ||
-        station.city.toLowerCase().includes(q)
+        (station.name || '').toLowerCase().includes(q) ||
+        (station.address || '').toLowerCase().includes(q) ||
+        (station.city || '').toLowerCase().includes(q)
 
       const matchStatus =
         statusFilter === 'all' ||

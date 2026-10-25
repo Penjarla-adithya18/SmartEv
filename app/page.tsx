@@ -135,7 +135,7 @@ export default function HomePage() {
     if (!query.trim()) return stations.slice(0, 2)
     const q = query.toLowerCase()
     return stations.filter(
-      (s) => s.name.toLowerCase().includes(q) || s.address.toLowerCase().includes(q)
+      (s) => (s.name || '').toLowerCase().includes(q) || (s.address || '').toLowerCase().includes(q)
     )
   }, [query, stations])
 

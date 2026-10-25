@@ -7,12 +7,7 @@ import {
   X,
   Sparkles,
   Zap,
-  BatteryCharging,
-  MapPin,
-  HelpCircle,
-  MessageSquare,
-  ShieldCheck,
-  Minimize2,
+  RotateCcw,
 } from 'lucide-react'
 import { generateSmartEVResponse } from '@/lib/aiService'
 
@@ -29,46 +24,44 @@ export default function AIChatbotWidget() {
   const [typing, setTyping] = useState(false)
   const chatEndRef = useRef<HTMLDivElement>(null)
 
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      sender: 'ai',
-      text: 'Hello! I am SmartEV AI Assistant ⚡ trained on Bhimavaram charging stations, rates, locations (Tatavarthy Hostel / JBR), Twilio OTP, and battery health advice. How can I help you today?',
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    },
-  ])
+  const initialGreeting: Message = {
+    id: '1',
+    sender: 'ai',
+    text:
+      '👋 Hello! I am **SmartEV AI Assistant** ⚡.\n\n' +
+      'I am trained on **every feature** of this website:\n' +
+      '• 🗺️ Road Corridor Multi-Stop Waypoints\n' +
+      '• ⚖️ Station Comparison & CC-CV Battery Calculator\n' +
+      '• 📈 Dynamic AI Demand Forecast (24-hr slider)\n' +
+      '• ⏱️ Live 15-Minute Grace Period Timer\n' +
+      '• 📅 1-Click Google Calendar & .ICS Sync\n' +
+      '• 🛵 Electric 2-Wheelers (Ola, Ather, 15A plugs)\n' +
+      '• 📜 Owner Portal & Certificate Upload\n\n' +
+      'Tap any quick button below or ask me anything!',
+    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+  }
+
+  const [messages, setMessages] = useState<Message[]>([initialGreeting])
 
   useEffect(() => {
     if (isOpen) {
       chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
     }
-  }, [messages, isOpen])
+  }, [messages, isOpen, typing])
 
-  const generateAIResponse = (userPrompt: string): string => {
-    const q = userPrompt.toLowerCase()
-
-    if (q.includes('fastest') || q.includes('fast') || q.includes('speed')) {
-      return '⚡ The fastest charger in Bhimavaram is the Bhimavaram EV Super Hub on J P Road, offering 180 kW DC Ultra-Fast charging (CCS2 & Type 2) with 6 out of 8 ports currently free!'
-    } else if (q.includes('location') || q.includes('tatavarthy') || q.includes('jbr') || q.includes('where am i')) {
-      return '📍 Your present location is set near Tatavarthy Hostel / JBR Convention area in Bhimavaram (16.5448° N, 81.5212° E). Stations like Adithya EV and Bhimavaram EV Super Hub are within 2.5 km!'
-    } else if (q.includes('price') || q.includes('cost') || q.includes('tariff') || q.includes('kwh') || q.includes('rate')) {
-      return '💰 EV charging tariffs in Bhimavaram range from ₹10 to ₹13.50 per kWh. Adithya EV offers ₹10/kWh, while Bhimavaram EV Super Hub is ₹12/kWh. Upgrade to Driver Pass Pro to get 15% OFF all stations!'
-    } else if (q.includes('otp') || q.includes('twilio') || q.includes('phone') || q.includes('sms')) {
-      return '📱 Verification is powered via Twilio SMS OTP. Dynamic 6-digit verification codes are sent directly to your phone. (Static test mode is currently active with code 1234 to save Twilio credits).'
-    } else if (q.includes('certificate') || q.includes('owner') || q.includes('license') || q.includes('register')) {
-      return '📜 Station owners registering on SmartEV upload an Authorized EV Station Certificate (e.g. AP-EV-AUTH-884920) for official government license verification before listing on the live map.'
-    } else if (q.includes('battery') || q.includes('health') || q.includes('soh') || q.includes('degradation')) {
-      return '🔋 To maximize EV battery longevity: Limit DC fast charging above 80% SoC, avoid leaving your battery at 0% or 100% for prolonged periods, and charge in shaded locations during peak summer heat.'
-    } else if (q.includes('book') || q.includes('reserve') || q.includes('slot')) {
-      return '📅 Booking a slot takes 15 seconds: Click "Reserve" on any station, select your date, time slot, and connector, verify your phone via OTP, and receive your digital QR pass!'
-    } else {
-      return `🤖 Thanks for your question! I am trained on SmartEV Bhimavaram stations, live map navigation, battery health tips, and Twilio SMS verification. You can ask me about "fastest charger", "charging prices", "battery care", or "station certificates".`
-    }
+  const handleClearChat = () => {
+    setMessages([
+      {
+        ...initialGreeting,
+        id: Date.now().toString(),
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      },
+    ])
   }
 
   const handleSendMessage = async (textToSend?: string) => {
-    const prompt = textToSend || inputMsg
-    if (!prompt.trim()) return
+    const prompt = (textToSend || inputMsg).trim()
+    if (!prompt) return
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -92,10 +85,31 @@ export default function AIChatbotWidget() {
       setMessages((prev) => [...prev, aiMessage])
     } catch (err) {
       console.warn('AI chatbot response error', err)
+      const errorMsg: Message = {
+        id: (Date.now() + 1).toString(),
+        sender: 'ai',
+        text: '⚡ I am online and ready! Ask me about fastest chargers, demand forecasts, comparing stations, or 15-min grace period timers.',
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      }
+      setMessages((prev) => [...prev, errorMsg])
     } finally {
       setTyping(false)
     }
   }
+
+  // Quick feature chips
+  const quickChips = [
+    { label: '⚡ Fastest Chargers', query: 'Where is the fastest charger in Bhimavaram or AP?' },
+    { label: '🛣️ Corridor Stops', query: 'How does the Road Corridor multi-stop waypoint feature work?' },
+    { label: '⚖️ Compare & Calculator', query: 'Tell me about the EV station compare and battery calculator feature' },
+    { label: '📈 Demand Forecast', query: 'How does the AI Demand Forecast and peak hours slider work?' },
+    { label: '⏱️ 15-Min Grace Timer', query: 'What is the live 15-minute grace period countdown timer?' },
+    { label: '📅 Google Calendar', query: 'How does 1-click Google Calendar integration work?' },
+    { label: '🛵 Electric Bikes', query: 'How are electric bikes and scooters supported in SmartEV?' },
+    { label: '💰 Tariffs & Pricing', query: 'What are current charging prices and Driver Pass Pro benefits?' },
+    { label: '📜 Owner License', query: 'How does owner station registration and certificate verification work?' },
+    { label: '🔋 Battery Tips', query: 'What are best practices for EV battery health and longevity?' },
+  ]
 
   return (
     <div className="fixed bottom-5 right-5 z-50 font-sans">
@@ -113,9 +127,9 @@ export default function AIChatbotWidget() {
 
       {/* Expanded AI Chat Widget Panel */}
       {isOpen && (
-        <div className="w-[360px] sm:w-[390px] h-[520px] rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0f172a] shadow-2xl flex flex-col overflow-hidden transition-colors animate-in fade-in zoom-in-95 duration-200">
+        <div className="w-[360px] sm:w-[420px] h-[550px] rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0f172a] shadow-2xl flex flex-col overflow-hidden transition-colors animate-in fade-in zoom-in-95 duration-200">
           {/* Panel Header */}
-          <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-[#0f172a] px-4 py-3.5 flex items-center justify-between text-white border-b border-slate-700">
+          <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-[#0f172a] px-4 py-3 flex items-center justify-between text-white border-b border-slate-700 shrink-0">
             <div className="flex items-center gap-2.5">
               <div className="flex size-9 items-center justify-center rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400">
                 <Bot className="size-5" />
@@ -126,17 +140,26 @@ export default function AIChatbotWidget() {
                   <Sparkles className="size-3.5 text-cyan-400" />
                 </h3>
                 <p className="text-[10px] text-emerald-400 font-semibold flex items-center gap-1">
-                  <span className="size-1.5 rounded-full bg-emerald-400 animate-ping" /> Online • Trained for Bhimavaram
+                  <span className="size-1.5 rounded-full bg-emerald-400 animate-ping" /> Online • All Features Trained
                 </p>
               </div>
             </div>
 
-            <button
-              onClick={() => setIsOpen(false)}
-              className="rounded-lg p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 transition"
-            >
-              <X className="size-5" />
-            </button>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={handleClearChat}
+                title="Restart Chat"
+                className="rounded-lg p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 transition text-xs flex items-center gap-1"
+              >
+                <RotateCcw className="size-3.5" />
+              </button>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="rounded-lg p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 transition"
+              >
+                <X className="size-5" />
+              </button>
+            </div>
           </div>
 
           {/* Messages Scroll Area */}
@@ -152,47 +175,40 @@ export default function AIChatbotWidget() {
                   </div>
                 )}
                 <div
-                  className={`max-w-[80%] rounded-2xl p-3 space-y-1 ${
+                  className={`max-w-[85%] rounded-2xl p-3 space-y-1.5 ${
                     msg.sender === 'user'
-                      ? 'bg-cyan-500 text-slate-950 font-medium rounded-br-none'
+                      ? 'bg-cyan-500 text-slate-950 font-semibold rounded-br-none shadow-sm'
                       : 'bg-white dark:bg-[#0f172a] text-slate-900 dark:text-slate-200 border border-slate-200 dark:border-slate-800 shadow-sm rounded-bl-none'
                   }`}
                 >
-                  <p className="leading-relaxed">{msg.text}</p>
+                  <div className="leading-relaxed whitespace-pre-wrap font-sans text-xs">
+                    {msg.text}
+                  </div>
                   <span className="text-[9px] opacity-60 block text-right font-mono">{msg.timestamp}</span>
                 </div>
               </div>
             ))}
 
             {typing && (
-              <div className="flex gap-2 items-center text-slate-400 text-xs">
+              <div className="flex gap-2 items-center text-slate-400 text-xs py-1">
                 <Bot className="size-4 text-emerald-500 animate-spin" />
-                <span>SmartEV AI is thinking...</span>
+                <span className="font-medium text-emerald-600 dark:text-emerald-400">SmartEV AI is typing instantly...</span>
               </div>
             )}
             <div ref={chatEndRef} />
           </div>
 
           {/* Quick Prompts Bar */}
-          <div className="px-3 py-2 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0f172a] flex gap-1.5 overflow-x-auto text-[11px] whitespace-nowrap">
-            <button
-              onClick={() => handleSendMessage('Where is the fastest charger?')}
-              className="rounded-full border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 px-2.5 py-1 text-slate-700 dark:text-slate-300 hover:border-cyan-500"
-            >
-              ⚡ Fastest Charger
-            </button>
-            <button
-              onClick={() => handleSendMessage('What are current charging prices?')}
-              className="rounded-full border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 px-2.5 py-1 text-slate-700 dark:text-slate-300 hover:border-cyan-500"
-            >
-              💰 Prices per kWh
-            </button>
-            <button
-              onClick={() => handleSendMessage('How do battery health tips work?')}
-              className="rounded-full border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 px-2.5 py-1 text-slate-700 dark:text-slate-300 hover:border-cyan-500"
-            >
-              🔋 Battery Health
-            </button>
+          <div className="px-3 py-2 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0f172a] flex gap-1.5 overflow-x-auto text-[11px] whitespace-nowrap shrink-0">
+            {quickChips.map((chip) => (
+              <button
+                key={chip.label}
+                onClick={() => handleSendMessage(chip.query)}
+                className="rounded-full border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-900 px-2.5 py-1 text-slate-700 dark:text-slate-300 hover:border-cyan-500 hover:text-cyan-600 dark:hover:text-cyan-400 transition"
+              >
+                {chip.label}
+              </button>
+            ))}
           </div>
 
           {/* Input Box */}
@@ -201,18 +217,19 @@ export default function AIChatbotWidget() {
               e.preventDefault()
               handleSendMessage()
             }}
-            className="p-3 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0f172a] flex items-center gap-2"
+            className="p-3 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0f172a] flex items-center gap-2 shrink-0"
           >
             <input
               type="text"
               value={inputMsg}
               onChange={(e) => setInputMsg(e.target.value)}
-              placeholder="Ask SmartEV AI about chargers, rates..."
-              className="flex-1 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-3.5 py-2.5 text-xs text-slate-900 dark:text-white outline-none focus:border-cyan-500"
+              placeholder="Ask anything about SmartEV features, rates, routes..."
+              className="flex-1 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-3.5 py-2.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 outline-none focus:border-cyan-500 transition"
             />
             <button
               type="submit"
-              className="flex size-9 items-center justify-center rounded-xl bg-emerald-500 text-slate-950 hover:bg-emerald-400 transition shrink-0"
+              disabled={!inputMsg.trim()}
+              className="flex size-9 items-center justify-center rounded-xl bg-emerald-500 text-slate-950 hover:bg-emerald-400 active:scale-95 disabled:opacity-40 transition shrink-0"
             >
               <Send className="size-4" />
             </button>
